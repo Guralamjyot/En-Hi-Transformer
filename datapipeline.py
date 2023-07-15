@@ -20,8 +20,11 @@ nhead=8
 dropout_prob=0.2
 model_dim=512
 model_layers=6
-Batch=32
-source_sen='how hard can it be to translate?'
+Batch=128
+Batch_mid=96
+Batch_large=32
+Batch_xl=16
+source_sen='did you do it?'
 
 
 
@@ -97,13 +100,14 @@ def collate(batch):
     for src,tgt in batch:
         s=source_transform(src.rstrip('\n'))
         t=target_transform(tgt.rstrip('\n'))
-        if s.shape[-1]<25 and t.shape[-1]<25 and s.shape[-1]>1 and t.shape[-1]>1:
+        #s.shape[-1]<25 and t.shape[-1]<25 and 
+        if s.shape[-1]>1 and t.shape[-1]>1:
             source.append(s)
             target.append(t)
  
-    #if len(source)==0:
-        #source.append(source_transform('yes'))
-        #target.append(target_transform('हाँ'))
+    if len(source)==0:
+        source.append(source_transform('yes'))
+        target.append(target_transform('हाँ'))
 
     source= pad_sequence(source,padding_value=1,batch_first=True)
     target= pad_sequence(target,padding_value=1,batch_first=True)
@@ -119,8 +123,20 @@ tgt_vocab_size=len(target_vocab)
 
 model=transformer.Transformer(model_dim,src_vocab_size,tgt_vocab_size,nhead,model_layers,dropout_prob)
 
-train_data=src_tgt('source_train.txt','target_train.txt')
-train_loader=DataLoader(train_data,batch_size=Batch,collate_fn=collate)
+train_data_small=src_tgt('source_train_small.txt','target_train_small.txt')
+train_loader_small=DataLoader(train_data_small,batch_size=Batch,collate_fn=collate)
+
+train_data_mid=src_tgt('source_train_mid.txt','target_train_mid.txt')
+train_loader_mid=DataLoader(train_data_mid,batch_size=Batch_mid,collate_fn=collate)
+
+train_data_large=src_tgt('source_train_large.txt','target_train_large.txt')
+train_loader_large=DataLoader(train_data_large,batch_size=Batch_large,collate_fn=collate)
+
+train_data_xl=src_tgt('source_train_xl.txt','target_train_xl.txt')
+train_loader_xl=DataLoader(train_data_xl,batch_size=Batch_xl,collate_fn=collate)
+
+def data():
+    return [train_loader_small,train_loader_mid,train_loader_large,train_loader_xl]
 
 valid_data=src_tgt('source_test.txt','target_test.txt')
 valid_loader=DataLoader(valid_data,batch_size=Batch,collate_fn=collate)

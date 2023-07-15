@@ -309,7 +309,7 @@ def calculate_bleu_score(transformer, token_ids_loader, trg_field_processor):
         print(f'BLEU-4 corpus score = {bleu_score}, corpus length = {len(gt_sentences_corpus)}')
         return bleu_score
     
-def greedy_decoding(baseline_transformer, src_representations_batch, src_mask, tgt_vocab, max_target_tokens=100):
+def greedy_decoding(baseline_transformer, src_representations_batch, src_mask, tgt_vocab, max_target_tokens=300):
    
     device = 'cuda'
     pad_token_id = 1
